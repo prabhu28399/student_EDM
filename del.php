@@ -1,211 +1,219 @@
-<?php
-// Include the database connection file
-require_once 'database.php';
-
-try {
-    // Fetch all student records from the database
-    $stmt = $pdo->query("SELECT id, name, email, mobile, student_id FROM students");
-    $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Error fetching data: " . $e->getMessage());
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
-    <title>Admin Dashboard</title>
-    <style>
-        .sidebar {
-            height: 100vh;
-            background-color: #343a40;
-            color: white;
-            padding-top: 20px;
-        }
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            padding: 10px;
-        }
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-        .content {
-            padding: 20px;
-        }
-        .card {
-            margin-bottom: 20px;
-        }
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background-color: #f8f9fa;
-        }
-        .nav_logo {
-            width: 17%;
-        }
-        .nav_logo img, .profile_img img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-        }
-        .search {
-            flex-grow: 1;
-            margin: 0 20px;
-        }
-        .search input {
-            width: 100%;
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .nav_profile_message ul {
-            list-style: none;
-            display: flex;
-            align-items: center;
-            margin: 0;
-            padding: 0;
-        }
-        .nav_profile_message ul li {
-            margin-right: 15px;
-        }
-        .profile_img select {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 2px 5px;
-        }
-        .side_bar {
-            background-color: beige;
-            height: 100vh;
-            padding-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Card</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      background-color: #f5f5f5;
+    }
+
+    /* Sidebar Styles */
+    .sidenav {
+      height: 100%;
+      width: 250px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #343a40;
+      color: white;
+      padding-top: 20px;
+    }
+
+    .sidenav a {
+      color: white;
+      padding: 8px 15px;
+      text-decoration: none;
+      font-size: 18px;
+      display: block;
+    }
+
+    .sidenav a:hover {
+      background-color: #575757;
+      color: #ffd700;
+    }
+
+    /* Profile Card Styles */
+    .profile-card {
+      border: none;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-left: 260px;
+      width: calc(100% - 260px);
+    }
+
+    .card-header {
+      height: 160px;
+      position: relative;
+      background-color: #4a2bb7;
+    }
+
+    /* Curved Background */
+    .curved-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(to right, #ff6e40, #ffcc00);
+      clip-path: circle(120% at 50% 0%);
+      z-index: 1;
+    }
+
+    .profile-image {
+      position: absolute;
+      bottom: -50px;
+      left: 20px;
+      border: 4px solid #fff;
+      width: 110px;
+      height: 110px;
+      background-color: #fff;
+      z-index: 2;
+      border-radius: 50%;
+    }
+
+    .card-body {
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    .card-body .row {
+      text-align: left;
+    }
+
+    .card-body .row p {
+      margin: 5px 0;
+    }
+
+    .shapes .shape {
+      position: absolute;
+      bottom: 0;
+      right: 10px;
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+    }
+
+    .shapes .shape.bg-warning {
+      background-color: #ffc107;
+    }
+
+    .shapes .shape.bg-danger {
+      background-color: #fd7e14;
+      right: 70px;
+    }
+
+    /* Navbar Styles */
+    .navbar-custom {
+      background-color: #e4e7eb;
+    }
+
+    .navbar-custom .navbar-brand,
+    .navbar-custom .navbar-nav .nav-link {
+      color: #4a2bb7;
+    }
+
+    .navbar-custom .navbar-nav .nav-link:hover {
+      color: #ff6e40;
+    }
+
+    .navbar-custom .navbar-toggler-icon {
+      background-color: #4a2bb7;
+    }
+
+    .navbar-custom .nav-item.active .nav-link {
+      color: #ffd700;
+    }
+
+    /* Profile Image on Navbar */
+    .navbar-custom .profile-img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="body_child">
-        <!-- Navbar -->
-        <div class="navbar">
-            <!-- Logo -->
-            <div class="nav_logo">
-                <img src="https://via.placeholder.com/50" alt="Logo">
-            </div>
-            <!-- Search Bar -->
-            <div class="search">
-                <input type="text" placeholder="Search...">
-            </div>
-            <!-- Profile and Message Icons -->
-            <div class="nav_profile_message">
-                <ul>
-                    <li>
-                        <div class="profile_img">
-                            <select name="student_name">
-                                <option value="">Student</option>
-                                <option value="1">John Doe</option>
-                                <option value="2">Jane Smith</option>
-                            </select>
-                            <img src="https://themewagon.com/wp-content/uploads/2024/11/BootsLander.webp" alt="Profile Image">
-                        </div>
-                    </li>
-                    <li>
-                        <i class="bi bi-envelope-at" style="font-size: 1.5rem; cursor: pointer;"></i>
-                    </li>
-                    <li>
-                        <i class="bi bi-bell" style="font-size: 1.5rem; cursor: pointer;"></i>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="container-fluid">
-            <div class="row">
-                <nav class="col-md-2 d-none d-md-block side_bar">
-                    <ul class="nav flex-column">
-                        <li class="nav-item"><a class="nav-link active" href="#">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Manage Users</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">View Reports</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Settings</a></li>
-                        <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
-                    </ul>
-                </nav>
-                <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4 content">
-                    <!-- Dashboard Content -->
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="card text-white bg-success mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Students</h5>
-                                    <p class="card-text">150,000</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-primary mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Teachers</h5>
-                                    <p class="card-text">2,250</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-warning mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Parents</h5>
-                                    <p class="card-text">5,690</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-danger mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Earnings</h5>
-                                    <p class="card-text">$193,000</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Student Details Table -->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="table-responsive">
-                                <h4>student's details</h4>
-                                <table class="table table-striped table-bordered">
-                                    <thead class="thead-dark">
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Student ID</th>
-                                            <th>Mobile</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($students as $student): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($student['name']); ?></td>
-                                            <td><?php echo htmlspecialchars($student['student_id']); ?></td>
-                                            <td><?= htmlspecialchars($student['email']); ?></td>
-                                            <td><?php echo htmlspecialchars($student['mobile']); ?></td>
-                                            <td>
-                                                <button class="btn btn-primary btn-sm">Edit</button>
-                                                <button class="btn btn-danger btn-sm">Delete</button>
-                                            </td>
-                                        </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-            </div>
-        </div>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <span class="navbar-brand ms-3">Student Details</span>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-search"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-moon"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-arrows-expand"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-chat-dots"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-bell"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"><i class="bi bi-gear"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"><img src="https://via.placeholder.com/35" class="profile-img" alt="Profile"></a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Sidebar -->
+  <div class="sidenav">
+    <h3 class="text-center text-white">Menu</h3>
+    <a href="#">Dashboard</a>
+    <a href="#">Task Manager</a>
+    <a href="#">Daily Summary</a>
+    <a href="#">Attendance</a>
+    <a href="#">Bonus Points</a>
+    <a href="#">Time Table</a>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container mt-5 pt-5">
+    <div class="card profile-card">
+      <div class="card-header bg-primary position-relative">
+        <div class="curved-background"></div>
+        <div class="profile-image">
+          <img src="https://via.placeholder.com/100" alt="Profile Image" class="rounded-circle">
+        </div>
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Karen Hope</h5>
+        <p class="text-muted mb-4">Student</p>
+        <div class="row">
+          <div class="col-6">
+            <p><i class="bi bi-person-circle"></i> Parents: <strong>Justin Hope</strong></p>
+            <p><i class="bi bi-telephone"></i> Phone: <strong>+12 345 6789 0</strong></p>
+          </div>
+          <div class="col-6">
+            <p><i class="bi bi-geo-alt"></i> Address: <strong>Jakarta, Indonesia</strong></p>
+            <p><i class="bi bi-envelope"></i> Email: <strong>Historia@mail.com</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
